@@ -17,7 +17,6 @@ import Text.Parsing.Parser.Token (digit)
 
 parse :: String -> Either ParseError (Array Instruction)
 parse s = fromFoldable <$> runParser s parseInstructions
-
 parseInstructions :: Parser String (List Instruction)
 parseInstructions = sepBy (parseInstruction) (string ", ")
 

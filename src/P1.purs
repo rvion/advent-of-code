@@ -1,4 +1,4 @@
-module P1.Solution where
+module P1 where
 
 import Prelude
 import Control.Alternative (empty, (<|>))
@@ -13,7 +13,7 @@ import Util (getFile)
 
 solve :: Eff _ Unit
 solve = do
-  input <- parse <$> getFile
+  input <- parse <$> getFile "src/p1/input.txt"
   case input of
     Left err -> do
       log "error parsing"
