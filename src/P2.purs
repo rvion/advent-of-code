@@ -7,7 +7,6 @@ import Data.Array (foldl, index, scanl)
 import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ord (abs)
 import Data.String (charAt, fromCharArray, toCharArray)
-import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafeCrashWith)
 
 data Pos = Pos Int Int
@@ -15,25 +14,17 @@ type Pad = Array String
 
 test :: forall e. Eff (console :: CONSOLE | e) Unit
 test = do
-  logShow (Tuple solution1 solve1)
-  logShow (Tuple solution2 solve2)
+  logShow $ "14894 == " <> solve pad1 (Pos 1 1)
+  logShow $ "26B96 == " <> solve pad2 (Pos 0 2)
 
-solve1 :: String
-solve1 = solve pad1 (Pos 1 1)
-  # map (codeAt pad1)
-  # map (fromMaybe '?')
-  # fromCharArray
-
-solve2 :: String
-solve2 = solve pad2 (Pos 0 2)
-  # map (codeAt pad2)
+solve :: Pad -> Pos -> String
+solve pad pos = solvePos pad pos
+  # map (codeAt pad)
   # map (fromMaybe '?')
   # fromCharArray
 
 codeAt :: Pad -> Pos -> Maybe Char
-codeAt pad (Pos x y) = do
-  str <- index pad y
-  charAt x str
+codeAt pad (Pos x y) = index pad y >>= charAt x
 
 pad2 :: Pad
 pad2 =
@@ -54,8 +45,8 @@ isValid pad pos = case codeAt pad pos of
   Just c -> c /= ' '
   Nothing -> false
 
-solve :: Pad -> Pos -> Array Pos
-solve pad startPos = scanl applyLine startPos input
+solvePos :: Pad -> Pos -> Array Pos
+solvePos pad startPos = scanl applyLine startPos input
   where
     applyLine :: Pos -> String -> Pos
     applyLine pos str = foldl (moveOn pad) pos (toCharArray str)
@@ -88,9 +79,3 @@ input =
   , "DRUDRDURUURDLRLUUUUURUDLRDUURLLDUULDUULDLURDDUULDRDDRDULUDDDRRRRLDDUURLRDLLRLRURDRRRDURDULRLDRDURUDLLDDULRDUDULRRLLUDLLUUURDULRDDLURULRURDDLRLLULUDURDRRUDLULLRLDUDLURUDRUULDUDLRDUDRRDULDDLDRLRRULURULUURDULRRLDLDULULRUUUUULUURLURLRDLLRRRRLURRUDLRLDDDLDRDRURLULRDUDLRLURRDRRLRLLDLDDLLRRULRLRLRUDRUUULLDUULLDDRLUDDRURLRLDLULDURLLRRLDLLRDDDUDDUULLUDRUDURLLRDRUDLUDLLUDRUUDLRUURRRLLUULLUUURLLLRURUULLDLLDURUUUULDDDLRLURDRLRRRRRRUDLLLRUUULDRRDLRDLLDRDLDDLDLRDUDLDDRDDDDRULRRLRDULLDULULULRULLRRLLUURUUUDLDLUDUDDDLUUDDDDUDDDUURUUDRDURRLUULRRDUUDDUDRRRDLRDRLDLRRURUUDRRRUUDLDRLRDURD"
   , "DDDLRURUDRRRURUUDLRLRDULDRDUULRURRRUULUDULDDLRRLLRLDDLURLRUDRLRRLRDLRLLDDLULDLRRURDDRDLLDDRUDRRRURRDUDULUDDULRRDRLDUULDLLLDRLUDRDURDRRDLLLLRRLRLLULRURUUDDRULDLLRULDRDLUDLULDDDLLUULRRLDDUURDLULUULULRDDDLDUDDLLLRRLLLDULRDDLRRUDDRDDLLLLDLDLULRRRDUDURRLUUDLLLLDUUULDULRDRULLRDRUDULRUUDULULDRDLDUDRRLRRDRLDUDLULLUDDLURLUUUDRDUDRULULDRDLRDRRLDDRRLUURDRULDLRRLLRRLDLRRLDLDRULDDRLURDULRRUDURRUURDUUURULUUUDLRRLDRDLULDURUDUDLUDDDULULRULDRRRLRURLRLRLUDDLUUDRRRLUUUDURLDRLRRDRRDURLLL"
   ]
-
-solution1 :: String
-solution1 = "14894"
-
-solution2 :: String
-solution2 = "26B96"
