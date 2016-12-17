@@ -13,44 +13,41 @@ import Util (getFile)
 
 type Triangle = Array Int
 
-test :: Eff _ Unit
+test ::forall e. Eff _ Unit
 test = do
   input <- getFile "src/p3.txt"
-  logShow $ "917 == " <> show (solve input extract1)
-  logShow $ "??? == " <> show (solve input extract2)
-  logShow $ [[1,2,3],[4,5,6],[7,8,9]] # chunks 3
-    # map transpose
-    # concat
+  logShow $ "917  == " <> show (solve input extract1)
+  logShow $ "1649 == " <> show (solve input extract2)
+
+solve :: String -> (String -> Array Triangle) -> Int
+solve str extract = extract str
+  # filter isValidTriangle
+  # length
+
+isValidTriangle :: Array Int -> Boolean
+isValidTriangle = case _ of
+  [a,b,c] -> and
+    [ a+b > c
+    , a+c > b
+    , b+c > a]
+  _ -> false
 
 extract1 :: String -> Array Triangle
-extract1 str = lines # map toTriangle
+extract1 = parseTriangle
+
+extract2 :: String -> Array Triangle
+extract2 = parseTriangle
+  >>> chunks 3
+  >>> map transpose
+  >>> concat
+
+parseTriangle :: String -> Array Triangle
+parseTriangle str = lines # map toTriangle
   where
     lines = split (Pattern "\n") str
     toTriangle = split (Pattern " ")
       >>> filter (_ /= "")
       >>> map (fromString >>> unsafeFromMaybe)
-
-extract2 :: String -> Array Triangle
-extract2 str = extract1 str
-  # chunks 3
-  # map transpose
-  # concat
-
-solve :: String -> (String -> Array Triangle) -> Int
-solve str extract = filter isValid (extract str) # length
-  where
-    isValid :: Array Int -> Boolean
-    isValid = case _ of
-      [a,b,c] -> and
-        [ a+b > c
-        , a+c > b
-        , b+c > a]
-      _ -> false
-
-unsafeFromMaybe :: forall a. Maybe a -> a
-unsafeFromMaybe = case _ of
-  Nothing -> unsafeCrashWith "maybe was not a just"
-  Just a -> a
 
 chunks :: forall a. Int -> Array a -> Array (Array a)
 chunks _ [] = []
@@ -64,3 +61,8 @@ transpose m = case uncons m of
       (transpose (m # map (drop 1)))
     _ -> []
   _ -> []
+
+unsafeFromMaybe :: forall a. Maybe a -> a
+unsafeFromMaybe = case _ of
+  Nothing -> unsafeCrashWith "maybe was not a just"
+  Just a -> a
