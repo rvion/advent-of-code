@@ -1,2 +1,2 @@
-var Main = require("./output/P2/index.js");
-Main.main()
+var Main = require("./output/P3/index.js");
+Main.test()
