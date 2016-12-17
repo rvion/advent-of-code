@@ -2,50 +2,78 @@ module P2 where
 
 import Prelude
 import Control.Monad.Eff (Eff)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff.Console (CONSOLE, logShow)
 import Data.Array (foldl, index, scanl)
-import Data.Maybe (fromMaybe)
+import Data.Maybe (Maybe(..), fromMaybe)
 import Data.Ord (abs)
 import Data.String (charAt, fromCharArray, toCharArray)
+import Data.Tuple (Tuple(..))
 import Partial.Unsafe (unsafeCrashWith)
 
-main :: forall eff. Eff ( console :: CONSOLE | eff ) Unit
-main = log (fromCharArray (map padAt solution))
+data Pos = Pos Int Int
+type Pad = Array String
 
-padAt :: Pos -> Char
-padAt (Pos x y) = fromMaybe '?' do
+test :: forall e. Eff (console :: CONSOLE | e) Unit
+test = do
+  logShow (Tuple solution1 solve1)
+  logShow (Tuple solution2 solve2)
+
+solve1 :: String
+solve1 = solve pad1 (Pos 1 1)
+  # map (codeAt pad1)
+  # map (fromMaybe '?')
+  # fromCharArray
+
+solve2 :: String
+solve2 = solve pad2 (Pos 0 2)
+  # map (codeAt pad2)
+  # map (fromMaybe '?')
+  # fromCharArray
+
+codeAt :: Pad -> Pos -> Maybe Char
+codeAt pad (Pos x y) = do
   str <- index pad y
   charAt x str
 
-pad :: Array String
-pad =
+pad2 :: Pad
+pad2 =
   [ "  1  "
   , " 234 "
   , "56789"
   , " ABC "
-  , "  D  "
-  ]
-data Pos = Pos Int Int
+  , "  D  " ]
 
-solution :: Array Pos
-solution = scanl move (Pos 0 2) input
+pad1 :: Pad
+pad1 =
+  [ "123"
+  , "456"
+  , "789" ]
+
+isValid :: Pad -> Pos -> Boolean
+isValid pad pos = case codeAt pad pos of
+  Just c -> c /= ' '
+  Nothing -> false
+
+solve :: Pad -> Pos -> Array Pos
+solve pad startPos = scanl applyLine startPos input
   where
-    move :: Pos -> String -> Pos
-    move pos str = foldl diff pos (toCharArray str)
+    applyLine :: Pos -> String -> Pos
+    applyLine pos str = foldl (moveOn pad) pos (toCharArray str)
 
-diff :: Pos -> Char -> Pos
-diff (Pos x y) char = if isValid nextPos then nextPos else (Pos x y)
+moveOn :: Pad -> Pos -> Char -> Pos
+moveOn pad (Pos x y) char =
+  if isValid pad nextPos
+  then nextPos
+  else (Pos x y)
+
   where
-  isValid :: Pos -> Boolean
-  isValid pos = dist pos (Pos 2 2) <= 2
-
-  nextPos :: Pos
-  nextPos = case char of
-    'L' -> Pos (x-1) y
-    'R' -> Pos (x+1) y
-    'U' -> Pos x (y-1)
-    'D' -> Pos x (y+1)
-    _ -> unsafeCrashWith "unsafe input"
+    nextPos :: Pos
+    nextPos = case char of
+      'L' -> Pos (x-1) y
+      'R' -> Pos (x+1) y
+      'U' -> Pos x (y-1)
+      'D' -> Pos x (y+1)
+      _ -> unsafeCrashWith "unsafe input"
 
 dist :: Pos -> Pos -> Int
 dist (Pos x1 y1) (Pos x2 y2)
@@ -60,3 +88,9 @@ input =
   , "DRUDRDURUURDLRLUUUUURUDLRDUURLLDUULDUULDLURDDUULDRDDRDULUDDDRRRRLDDUURLRDLLRLRURDRRRDURDULRLDRDURUDLLDDULRDUDULRRLLUDLLUUURDULRDDLURULRURDDLRLLULUDURDRRUDLULLRLDUDLURUDRUULDUDLRDUDRRDULDDLDRLRRULURULUURDULRRLDLDULULRUUUUULUURLURLRDLLRRRRLURRUDLRLDDDLDRDRURLULRDUDLRLURRDRRLRLLDLDDLLRRULRLRLRUDRUUULLDUULLDDRLUDDRURLRLDLULDURLLRRLDLLRDDDUDDUULLUDRUDURLLRDRUDLUDLLUDRUUDLRUURRRLLUULLUUURLLLRURUULLDLLDURUUUULDDDLRLURDRLRRRRRRUDLLLRUUULDRRDLRDLLDRDLDDLDLRDUDLDDRDDDDRULRRLRDULLDULULULRULLRRLLUURUUUDLDLUDUDDDLUUDDDDUDDDUURUUDRDURRLUULRRDUUDDUDRRRDLRDRLDLRRURUUDRRRUUDLDRLRDURD"
   , "DDDLRURUDRRRURUUDLRLRDULDRDUULRURRRUULUDULDDLRRLLRLDDLURLRUDRLRRLRDLRLLDDLULDLRRURDDRDLLDDRUDRRRURRDUDULUDDULRRDRLDUULDLLLDRLUDRDURDRRDLLLLRRLRLLULRURUUDDRULDLLRULDRDLUDLULDDDLLUULRRLDDUURDLULUULULRDDDLDUDDLLLRRLLLDULRDDLRRUDDRDDLLLLDLDLULRRRDUDURRLUUDLLLLDUUULDULRDRULLRDRUDULRUUDULULDRDLDUDRRLRRDRLDUDLULLUDDLURLUUUDRDUDRULULDRDLRDRRLDDRRLUURDRULDLRRLLRRLDLRRLDLDRULDDRLURDULRRUDURRUURDUUURULUUUDLRRLDRDLULDURUDUDLUDDDULULRULDRRRLRURLRLRLUDDLUUDRRRLUUUDURLDRLRRDRRDURLLL"
   ]
+
+solution1 :: String
+solution1 = "14894"
+
+solution2 :: String
+solution2 = "26B96"
