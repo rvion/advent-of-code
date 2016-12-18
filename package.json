@@ -10,5 +10,8 @@
     "test": "node ./main.js > .dbg"
   },
   "author": "",
-  "license": "ISC"
+  "license": "ISC",
+  "dependencies": {
+    "md5": "^2.2.1"
+  }
 }
