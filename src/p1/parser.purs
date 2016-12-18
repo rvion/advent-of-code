@@ -14,6 +14,7 @@ import Text.Parsing.Parser (ParseError, Parser, fail, runParser)
 import Text.Parsing.Parser.Combinators (sepBy)
 import Text.Parsing.Parser.String (char, string)
 import Text.Parsing.Parser.Token (digit)
+import ParseUtils
 
 parse :: String -> Either ParseError (Array Instruction)
 parse s = fromFoldable <$> runParser s parseInstructions
@@ -32,17 +33,3 @@ parseInstruction = do parseLeft <|> parseRight
     parseRight = do
       char 'R'
       R <$> parseInt
-
-parseSingleDigitInt :: Parser String Int
-parseSingleDigitInt = do
-  d <- digitToInt <$> digit
-  case d of
-    Just num -> pure num
-    Nothing -> fail "impossible"
-
-parseInt :: Parser String Int
-parseInt = do
-  d <- fromCharArray >>> fromString <$> many digit
-  case d of
-    Just num -> pure num
-    Nothing -> fail "impossible"
