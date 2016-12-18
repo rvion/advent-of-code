@@ -8,6 +8,9 @@ import Node.Encoding (Encoding(..))
 import Node.FS (FS)
 import Node.FS.Sync (readFile)
 
+foreign import debug :: forall eff a.
+  a -> Eff eff Unit
+
 type ReadFileEffets eff =
   ( buffer :: BUFFER
   , fs :: FS
