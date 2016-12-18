@@ -15,6 +15,8 @@ import Util (md5, unsafeFromMaybe)
 input :: String
 input = "ojvtpuvg"
 
+-- sol 1 = 4543c154
+
 test :: Eff _ Unit
 test = void $ launchAff do
   log "start"
