@@ -3,13 +3,11 @@ module P3 where
 import Prelude
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Console (logShow)
-import Data.Array (concat, cons, drop, filter, length, take, uncons)
+import Data.Array (concat, filter, length)
 import Data.Foldable (and)
 import Data.Int (fromString)
-import Data.Maybe (Maybe(Just, Nothing))
 import Data.String (Pattern(Pattern), split)
-import Partial.Unsafe (unsafeCrashWith)
-import Util (getFile)
+import Util (chunks, getFile, transpose, unsafeFromMaybe)
 
 type Triangle = Array Int
 
@@ -48,21 +46,3 @@ parseTriangle str = lines # map toTriangle
     toTriangle = split (Pattern " ")
       >>> filter (_ /= "")
       >>> map (fromString >>> unsafeFromMaybe)
-
-chunks :: forall a. Int -> Array a -> Array (Array a)
-chunks _ [] = []
-chunks n xs = cons (take n xs) (chunks n $ drop n xs)
-
-transpose :: forall a. Array (Array a) -> Array (Array a)
-transpose m = case uncons m of
-  Just {head} -> case uncons head of
-    Just val -> cons
-      (map (take 1) m # concat)
-      (transpose (m # map (drop 1)))
-    _ -> []
-  _ -> []
-
-unsafeFromMaybe :: forall a. Maybe a -> a
-unsafeFromMaybe = case _ of
-  Nothing -> unsafeCrashWith "maybe was not a just"
-  Just a -> a
